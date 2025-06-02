@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import authService from "../appwrite/auth";
 import { login as authLogin } from "../store/authSlice";
 import { Button, Input, Logo } from "./index";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useForm } from "react-hook-form";
 
 function Login() {
@@ -18,6 +18,8 @@ function Login() {
       const session = await authService.login(data);
       if (session) {
         const userData = await authService.getCurrentUser();
+        console.log("userData", userData);
+
         if (userData) dispatch(authLogin(userData));
         navigate("/");
       }
@@ -26,6 +28,13 @@ function Login() {
       setError(error.message);
     }
   };
+
+ const something = useSelector((state) => state.auth.userData);
+
+useEffect(() => {
+  console.log("Updated userData from Redux:", something);
+}, [something]);
+
 
   return (
     <div className="flex items-center justify-center w-full">

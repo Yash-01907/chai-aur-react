@@ -1,50 +1,65 @@
 import React from "react";
-import { Editor } from "@tinymce/tinymce-react";
 import { Controller } from "react-hook-form";
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
+import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
+
+import { $getRoot, $getSelection } from "lexical";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import './styles.css'
+
+function EditorContent({ onChange }) {
+  const [editor] = useLexicalComposerContext();
+
+  return (
+    <OnChangePlugin
+      onChange={(editorState) => {
+        editorState.read(() => {
+          const htmlString = editor.getRootElement().innerHTML;
+          onChange(htmlString);
+        });
+      }}
+    />
+  );
+}
 
 export default function RTE({ name, control, label, defaultValue = "" }) {
+  const editorConfig = {
+    namespace: "MyEditor",
+    theme: {
+      paragraph: "editor-paragraph",
+    },
+    onError(error) {
+      throw error;
+    },
+    editorState: () => {
+      // Optional: set initial state if needed
+    },
+    nodes: [],
+  };
+
   return (
     <div className="w-full">
       {label && <label className="inline-block mb-1 pl-1">{label}</label>}
       <Controller
         name={name || "content"}
         control={control}
+        defaultValue={defaultValue}
         render={({ field: { onChange } }) => (
-          <Editor
-            apiKey="wggvmt0ytibfaqok1fhi6fpiwnr5l957rp2p16lo6xqfzzd6"
-            initialValue={defaultValue}
-            init={{
-              height: 500,
-              menubar: true,
-              plugins: [
-                "image",
-                "advlist",
-                "autolink",
-                "lists",
-                "link",
-                "image",
-                "charmap",
-                "preview",
-                "anchor",
-                "searchreplace",
-                "visualblocks",
-                "code",
-                "fullscreen",
-                "insertdatetime",
-                "media",
-                "table",
-                "code",
-                "help",
-                "wordcount",
-                "anchor",
-              ],
-              toolbar:
-                "undo redo | blocks | image | bold italic forecolor | alignleft aligncenter bold italic forecolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent |removeformat | help",
-              content_style:
-                "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
-            }}
-            onEditorChange={onChange}
-          />
+          <LexicalComposer initialConfig={editorConfig}>
+            <div className="editor-container">
+              <RichTextPlugin
+                contentEditable={<ContentEditable className="editor-input" />}
+                placeholder={
+                  <div className="editor-placeholder">Start writing...</div>
+                }
+              />
+              <HistoryPlugin />
+              <EditorContent onChange={onChange} />
+            </div>
+          </LexicalComposer>
         )}
       />
     </div>
