@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import userContext from "../context/userContext";
 
 function Login() {
@@ -8,6 +8,7 @@ function Login() {
   const handleSubmit = function (e) {
     e.preventDefault();
     setUser({ username, password });
+    
   };
   return (
     <div>
@@ -16,6 +17,7 @@ function Login() {
         type="text"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
+       
         placeholder="username"
       />
       <input
